@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-type Elemento struct {
-	Posicion int
-	Valor    string
-}
-
 func main() {
 	fmt.Println("Starting trebuchet calibrations...")
 	fmt.Println("Opening file...")
@@ -56,52 +51,50 @@ func main() {
 	}
 
 	for scanner.Scan() {
-		var numberAndOcurrence = []Elemento{}
 		word := scanner.Text()
-		var numberSlice = []string{}
-		var wordToDelete string = word
-		fmt.Println("Attempting Word: ", word)
-		for i := 0; i < len(possibleNumbers); i++ {
-			if strings.Contains(wordToDelete, possibleNumbers[i]) {
-				numberAndOcurrence = append(numberAndOcurrence, Elemento{strings.Index(word, possibleNumbers[i]), possibleNumbers[i]})
-				fmt.Println("Found ", possibleNumbers[i], " at ", strings.Index(word, possibleNumbers[i]))
-				wordToDelete = strings.Replace(wordToDelete, possibleNumbers[i], "", 1)
-				fmt.Println("Word: ", wordToDelete)
-				i = 0
-			}
+		first := findFirst(word, possibleNumbers)
+		last := findLast(word, possibleNumbers)
+		if len(first) > 1 {
+			first = fromStringToNumberString[first]
+		}
+		if len(last) > 1 {
+			last = fromStringToNumberString[last]
 		}
 
-		iter := 0
-
-		for iter < len(word) {
-			for i := 0; i < len(numberAndOcurrence); i++ {
-				if iter == numberAndOcurrence[i].Posicion {
-					var numberToInclude string
-					if isInt(numberAndOcurrence[i].Valor) {
-						numberToInclude = numberAndOcurrence[i].Valor
-					} else {
-						numberToInclude = fromStringToNumberString[numberAndOcurrence[i].Valor]
-					}
-					numberSlice = append(numberSlice, numberToInclude)
-				}
-			}
-			iter++
-		}
+		totalSum += calculateStringConcat([]string{first, last})
 
 		fmt.Println("Word: ", word)
-		fmt.Println("Number slice: ", numberSlice)
-		fmt.Println("Sum: ", calculateStringConcat(numberSlice))
-
-		totalSum += calculateStringConcat(numberSlice)
+		fmt.Println("First: ", first)
+		fmt.Println("Last: ", last)
+		fmt.Println("Sum: ", calculateStringConcat([]string{first, last}))
 
 	}
 
 	fmt.Println("Total sum: ", totalSum)
 }
 
-func isInt(s string) bool {
-	_, err := strconv.ParseInt(s, 10, 64)
-	return err == nil
+func findFirst(str string, substrs []string) string {
+	firstIndex := len(str)
+	value := ""
+	for _, substr := range substrs {
+		if pos := strings.Index(str, substr); pos > -1 && pos < firstIndex {
+			firstIndex = pos
+			value = substr
+		}
+	}
+	return value
+}
+
+func findLast(str string, substrs []string) string {
+	lastIndex := -1
+	value := ""
+	for _, substr := range substrs {
+		if pos := strings.LastIndex(str, substr); pos > lastIndex {
+			lastIndex = pos
+			value = substr
+		}
+	}
+	return value
 }
 
 func calculateStringConcat(numberSlice []string) int {
