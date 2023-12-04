@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+type Elemento struct {
+	Posicion int
+	Valor    string
+}
+
 func main() {
 	fmt.Println("Starting trebuchet calibrations...")
 	fmt.Println("Opening file...")
@@ -51,29 +56,44 @@ func main() {
 	}
 
 	for scanner.Scan() {
-		var numberToOcurrence = map[string]int{}
-		numberSlice := []string{}
+		var numberAndOcurrence = []Elemento{}
 		word := scanner.Text()
+		var numberSlice = []string{}
+		var wordToDelete string = word
+		fmt.Println("Attempting Word: ", word)
 		for i := 0; i < len(possibleNumbers); i++ {
-			if strings.Contains(word, possibleNumbers[i]) {
-				numberToOcurrence[possibleNumbers[i]] = strings.Index(word, possibleNumbers[i])
+			if strings.Contains(wordToDelete, possibleNumbers[i]) {
+				numberAndOcurrence = append(numberAndOcurrence, Elemento{strings.Index(word, possibleNumbers[i]), possibleNumbers[i]})
+				fmt.Println("Found ", possibleNumbers[i], " at ", strings.Index(word, possibleNumbers[i]))
+				wordToDelete = strings.Replace(wordToDelete, possibleNumbers[i], "", 1)
+				fmt.Println("Word: ", wordToDelete)
+				i = 0
 			}
 		}
-		for len(numberToOcurrence) > 0 {
-			var minIndex int
-			var minNumber string
-			for key, value := range numberToOcurrence {
-				if value < minIndex {
-					minIndex = value
-					minNumber = key
+
+		iter := 0
+
+		for iter < len(word) {
+			for i := 0; i < len(numberAndOcurrence); i++ {
+				if iter == numberAndOcurrence[i].Posicion {
+					var numberToInclude string
+					if isInt(numberAndOcurrence[i].Valor) {
+						numberToInclude = numberAndOcurrence[i].Valor
+					} else {
+						numberToInclude = fromStringToNumberString[numberAndOcurrence[i].Valor]
+					}
+					numberSlice = append(numberSlice, numberToInclude)
 				}
 			}
-			numberSlice = append(numberSlice, fromStringToNumberString[minNumber])
-			delete(numberToOcurrence, minNumber)
+			iter++
 		}
 
 		fmt.Println("Word: ", word)
 		fmt.Println("Number slice: ", numberSlice)
+		fmt.Println("Sum: ", calculateStringConcat(numberSlice))
+
+		totalSum += calculateStringConcat(numberSlice)
+
 	}
 
 	fmt.Println("Total sum: ", totalSum)
