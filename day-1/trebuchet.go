@@ -47,8 +47,8 @@ func isInt(s string) bool {
 }
 
 func calculateStringConcat(numberSlice []string) int {
-	numberString := ""
-	numberString = numberSlice[0] + numberSlice[len(numberSlice)-1]
+	var numberString string
+	numberString = numberSlice[0] + numberSlice[len(numberSlice) - 1]
 	number, err := strconv.Atoi(numberString)
 	if err != nil {
 		fmt.Println("Error converting string to int: ", err)
